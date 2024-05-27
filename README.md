@@ -1,2 +1,2 @@
 # BenchRC
-Benchmark Computer Visone against BERT Family notable model
+Benchmark Computer Vision against BERT Family notable model
