@@ -7,6 +7,7 @@ from typing import Any, Tuple, Dict
 
 from Support import constant as const
 import pandas as pd
+import numpy as np
 
 
 def extract_entrelsen(const_path_file) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
@@ -66,12 +67,14 @@ def store_datasets(path_to_save, ent, rel, sen) -> None:
     return
 
 
-def convert_to_supervised_dataset(path_saved_data):
+def convert_to_evidence(path_saved_data):
     """
-    This method take the json files and create unique csv dataset with entity pair labeled with their relation
+    This method take the json file and create unique csv dataset with entity pair labeled with their relation,
+    using only evidence sentences. dataset format -> evidence sent . 1 entity mentions, 2 entity mentions,
+    label relation.
     :param path_saved_data: contains base path for both entity with all the mentions and relationships between entity
     in bidirectional way  -> r(e1, e2) and r(e2,e1).
-    :return: a dataset with all the pair entity labeled with the relations
+    :return: a dataset with all format evidence sents plus the label relation.
     """
 
     with open(path_saved_data, 'r') as reader:
@@ -79,20 +82,24 @@ def convert_to_supervised_dataset(path_saved_data):
         reader.close()
 
     list_text = []
-    labels = {}
-    for i in range(0, 1):
+    list_label = []
+    for i in range(0, len(datas)):
         data = datas[i]
         entities = data['vertexSet']
         sent = data['sents']
         relations = data['labels']
+        # try use idx in labels for pairing entities es extract head and tail idxs for select th correct pair.
         for j in range(0, len(relations)):
+            # add method for negative samples i. e. labels = []  and mark them as no relations
             relation = relations[j]
             head_idx = relation['h']
             tail_idx = relation['t']
             evidence_sent = relation['evidence']
             head_ent_mentions = entities[head_idx]
             tail_ent_mentions = entities[tail_idx]
+            id_rel = relation['r']
             for k in range(0, len(evidence_sent)):
+                # eliminate redundant mentions that will be not part of relations
                 id_sent = evidence_sent[k]
                 sig_sent = sent[id_sent]
                 for s in range(0, len(head_ent_mentions)):
@@ -102,9 +109,31 @@ def convert_to_supervised_dataset(path_saved_data):
                     mentiont = tail_ent_mentions[t]
                     sig_sent.append(mentiont['name'])
                 list_text.append(sig_sent)
+                list_label.append(id_rel)
+            """
+    for i in range(0, len(list_text)):
+        list_text[i].append(list_label[i])  # update all cycle with lambda function and list compression.
+           
+           """
 
-        # try use idx in labels for pairing entities es extract head and tail idxs for select th correct pair.
+    array = np.array(list_text, dtype=object)
+    array = array.reshape((len(array), 1))
+    array_label = np.array(list_label)
+    array_label = array_label.reshape((len(array_label), 1))
+    dataset = pd.DataFrame(data=array, columns=['evidence sent . head ent mentions, tail ent mentions'])
+    dataset_label = pd.DataFrame(data=array_label, columns=['Relation labels'])
+    final_dataset = pd.concat([dataset, dataset_label], axis=1)
+    final_dataset.to_csv(const.PREPROCESS_ROOT + '/preprocess_docred.csv')
 
-    # label2id part
+    return
 
-    return list_text
+
+def map_label(path_csv, path_rel):
+    df = pd.read_csv(path_csv)
+    with open(path_rel, 'r') as reader:
+        info_label = json.load(reader)
+        reader.close()
+
+    df_label = df.drop(columns=0)
+
+    return
