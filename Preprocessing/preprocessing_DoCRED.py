@@ -123,7 +123,7 @@ def convert_to_evidence(path_saved_data):
     dataset = pd.DataFrame(data=array, columns=['evidence sent . head ent mentions, tail ent mentions'])
     dataset_label = pd.DataFrame(data=array_label, columns=['Relation labels'])
     final_dataset = pd.concat([dataset, dataset_label], axis=1)
-    final_dataset.to_csv(const.PREPROCESS_ROOT + '/preprocess_docred.csv')
+    final_dataset.to_csv(const.PREPROCESS_ROOT + '/preprocess_docred.csv', index=False)
 
     return
 
@@ -134,6 +134,25 @@ def map_label(path_csv, path_rel):
         info_label = json.load(reader)
         reader.close()
 
-    df_label = df.drop(columns=0)
+    df_label = df['Relation labels'].to_numpy()
+    counter = 0
+    for key, _ in info_label.items():
+        info_label[key] = counter
+        counter += 1
+
+    for i in range(0, df_label.shape[0]):
+        label = df_label[i]
+        for key, _ in info_label.items():
+            if key == label:
+                df_label[i] = info_label[key]
+            else:
+                continue
+
+    df_label = df_label.reshape((len(df_label), 1))
+    maps_labels = pd.DataFrame(data=df_label, columns=['Mapped Labels'])
+    mapped_dataset = pd.concat([df, maps_labels], axis=1)
+    # mapped_dataset = mapped_dataset.drop(columns=mapped_dataset.columns[0], axis=1)
+    # mapped_dataset = mapped_dataset.drop(columns=mapped_dataset.columns[1], axis=1)
+    mapped_dataset.to_csv(const.PREPROCESS_ROOT + '/complete_docred.csv', index=False)
 
     return
