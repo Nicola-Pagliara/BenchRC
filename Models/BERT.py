@@ -6,10 +6,10 @@ import torch
 class BERTClass(torch.nn.Module):
     def __init__(self):
         super(BERTClass, self).__init__()
-        self.l1 = BertModel.from_pretrained('google-bert/bert-base-uncased')
-        self.l2 = torch.nn.Linear(768, 768)
+        self.l1 = BertModel.from_pretrained('google-bert/bert-large-uncased')
+        self.l2 = torch.nn.Linear(1024, 1024)
         self.l3 = torch.nn.Dropout(0.2)
-        self.l4 = torch.nn.Linear(768, const.NUM_REL)
+        self.l4 = torch.nn.Linear(1024, const.NUM_REL)
 
     def forward(self, ids, mask, token_type_ids):
         _, output_1 = self.l1(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)

@@ -19,7 +19,7 @@ def train():
     dataloader_train = generate_dataloader(const.TRAIN_CSV_PATH)
     model = brt.BERTClass()
     optimizer = torch.optim.Adam(params=model.parameters(), lr=const.LEARNING_RATE)
-    loss_fn = torch.nn.BCEWithLogitsLoss()
+    loss_fn = torch.nn.CrossEntropyLoss()
     model.train()
     for epoch in range(const.EPOCHS):
         for step, sample in tqdm(enumerate(dataloader_train, 0)):
@@ -31,7 +31,7 @@ def train():
             _, outputs = torch.max(outputs, 1)
             optimizer.zero_grad()
             loss = loss_fn(outputs.float(), label.float())
-            if step % 2000 == 0:
+            if step % 1000 == 0:
                 print('Epoch {}, Loss {}'.format(epoch, loss.item()))
 
             loss.requires_grad = True
