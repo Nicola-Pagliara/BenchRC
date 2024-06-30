@@ -1,5 +1,4 @@
 import os
-
 DATA_ROOT = 'Data'
 PREPROCESS_ROOT = 'Preprocessing'
 MODEL_ROOT = 'Model'
