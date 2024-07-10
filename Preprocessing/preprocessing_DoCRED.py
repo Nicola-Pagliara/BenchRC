@@ -112,7 +112,7 @@ def convert_to_evidence(path_saved_data):
                 list_label.append(id_rel)
             """
     for i in range(0, len(list_text)):
-        list_text[i].append(list_label[i])  # update all cycle with lambda function and list compression.
+        list_text[i].append(list_label[i])  # update all cycle with lambda function or list comprhension.
            
            """
 
@@ -134,7 +134,7 @@ def map_label(path_csv, path_rel):
         info_label = json.load(reader)
         reader.close()
 
-    df_label = df['Relation labels'].to_numpy()
+    df_label = df['rel label'].to_numpy()
     counter = 0
     for key, _ in info_label.items():
         info_label[key] = counter
@@ -152,7 +152,90 @@ def map_label(path_csv, path_rel):
     maps_labels = pd.DataFrame(data=df_label, columns=['Mapped Labels'])
     mapped_dataset = pd.concat([df, maps_labels], axis=1)
     # mapped_dataset = mapped_dataset.drop(columns=mapped_dataset.columns[0], axis=1)
-    # mapped_dataset = mapped_dataset.drop(columns=mapped_dataset.columns[1], axis=1)
-    mapped_dataset.to_csv(const.PREPROCESS_ROOT + '/complete_docred.csv', index=False)
+    mapped_dataset = mapped_dataset.drop(columns=mapped_dataset.columns[1], axis=1)
+    mapped_dataset.to_csv(const.PREPROCESS_ROOT + '/train_ht_dataset_test.csv', index=False)
+
+    return
+
+def convert_head_tail_dataset(path_json):
+    with open(path_json, 'r') as reader:
+        datas = json.load(reader)  # return list of dicts
+        reader.close()
+
+    list_head = []
+    list_tail = []
+    list_label = []
+    for i in range(0, len(datas)):
+        data = datas[i]
+        entities = data['vertexSet']
+        sents = data['sents']
+        relations = data['labels']
+        for j in range(0, len(relations)):
+            relation = relations[j]
+            head_idx = relation['h']
+            tail_idx = relation['t']
+            id_rel = relation['r']
+            head_ent_mentions = entities[head_idx]
+            tail_ent_mentions = entities[tail_idx]
+            for h in range(0, len(head_ent_mentions)):
+                sig_ment_h = head_ent_mentions[h]
+                id_sent = sig_ment_h['sent_id']
+                sig_sent = sents[id_sent]
+                sig_sent.append('#')
+                sig_sent.append(sig_ment_h['name'])
+            list_head.append(sig_sent)
+            for t in range(0, len(tail_ent_mentions)):
+                sig_ment_t = tail_ent_mentions[t]
+                id_sent_t = sig_ment_t['sent_id']
+                sig_sent_t = sents[id_sent_t]
+                sig_sent_t.append('#')
+                sig_sent_t.append(sig_ment_t['name'])
+            list_tail.append(sig_sent_t)
+            list_label.append(id_rel)
+    
+    array_head = np.array(list_head, dtype=object).reshape(len(list_head), 1)
+    array_tail = np.array(list_tail, dtype=object).reshape(len(list_tail), 1)
+    array_label = np.array(list_label).reshape(len(list_label), 1)
+    df_h = pd.DataFrame(data=array_head, columns=['head sent'])
+    df_t = pd.DataFrame(data=array_tail, columns=['tail sent'])
+    df_r = pd.DataFrame(data=array_label, columns=['rel label'])
+    final_dataset = pd.concat([df_h, df_t, df_r], axis=1)
+    final_dataset.to_csv(const.PREPROCESS_ROOT + '/head_tail_test.csv', index=False )
+    
+    return
+
+
+def prepare_intra_dataset():
+
+    df = pd.read_csv(const.PREPROCESS_ROOT + '/head_tail_test.csv') # add this path to constant and generalize it
+    array_head = df[df.columns[0]].to_list()
+    array_tail = df[df.columns[1]].to_list()
+    array_label = df[df.columns[2]].to_list()
+    new_list = []
+    new_label = []
+
+
+    for i in range(0, len(array_head)):
+        # try to use regex instead of tanslate for removing duplicates
+        sent_head, mentions = array_head[i].split('#', maxsplit=1)
+        sent_tail, mentions_t = array_tail[i].split('#', maxsplit=1)
+        if sent_head == sent_tail:
+            sent_head = sent_head.translate({ord(i): None for i in '[]'})
+            mentions = mentions.translate({ord('#'): None})
+            mentions_t = mentions_t.translate({ord('#'): None})
+            new_sent = "".join([sent_head,'#', mentions, mentions_t]) 
+            new_label.append(array_label[i])
+            new_list.append(new_sent)
+
+        else:
+            continue
+    
+    new_df = pd.DataFrame(data=new_list, columns=['sents head tail'])
+    df_label = pd.DataFrame(data=new_label, columns=['rel label'])
+    final_dataset = pd.concat([new_df, df_label], axis=1)
+    final_dataset.to_csv(const.PREPROCESS_ROOT + '/intra_dataset_test.csv', index=False)
+
+
+
 
     return
