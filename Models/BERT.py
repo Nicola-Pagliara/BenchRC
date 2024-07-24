@@ -6,10 +6,10 @@ import torch
 class BERTClass(torch.nn.Module):
     def __init__(self):
         super(BERTClass, self).__init__()
-        self.l1 = BertModel.from_pretrained('google-bert/bert-large-uncased')
-        self.l2 = torch.nn.Linear(1024, 1024)
-        self.l3 = torch.nn.Dropout(0.2)
-        self.l4 = torch.nn.Linear(1024, const.NUM_REL)
+        self.l1 = BertModel.from_pretrained('google-bert/bert-base-uncased')
+        self.l2 = torch.nn.Linear(768, 768)
+        self.l3 = torch.nn.Dropout(const.DROPOUT_RATE)
+        self.l4 = torch.nn.Linear(768, const.NUM_REL)
 
     def forward(self, ids, mask, token_type_ids):
         _, output_1 = self.l1(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)
@@ -24,7 +24,7 @@ class DistilBERTClass(torch.nn.Module):  # check if introduce tanh or other func
         super(DistilBERTClass, self).__init__()
         self.l1 = DistilBertModel.from_pretrained("distilbert-base-uncased")
         self.l2 = torch.nn.Linear(768, 768)
-        self.l3 = torch.nn.Dropout(0.2)
+        self.l3 = torch.nn.Dropout(const.DROPOUT_RATE)
         self.l4 = torch.nn.Linear(768, const.NUM_REL)
 
     def forward(self, input_ids, attention_mask, token_type_ids):
@@ -43,7 +43,7 @@ class RobertaClass(torch.nn.Module):
         super(RobertaClass, self).__init__()
         self.l1 = RobertaModel.from_pretrained("roberta-base")
         self.pre_classifier = torch.nn.Linear(768, 768)
-        self.dropout = torch.nn.Dropout(0.2)
+        self.dropout = torch.nn.Dropout(const.DROPOUT_RATE)
         self.classifier = torch.nn.Linear(768, const.NUM_REL)
 
     def forward(self, input_ids, attention_mask, token_type_ids):
@@ -60,9 +60,9 @@ class RobertaClass(torch.nn.Module):
 class SqueezeBERTClass(torch.nn.Module):
     def __init__(self):
         super(SqueezeBERTClass, self).__init__()
-        self.l1 = SqueezeBERTClass.from_pretrained("squeezebert/squeezebert-uncased")
+        self.l1 = SqueezeBertModel.from_pretrained("squeezebert/squeezebert-uncased")
         self.pre_classifier = torch.nn.Linear(768, 768)
-        self.dropout = torch.nn.Dropout(0.2)
+        self.dropout = torch.nn.Dropout(const.DROPOUT_RATE)
         self.classifier = torch.nn.Linear(768, const.NUM_REL)
 
     def forward(self, input_ids, attention_mask, token_type_ids):

@@ -151,9 +151,8 @@ def map_label(path_csv, path_rel):
     df_label = df_label.reshape((len(df_label), 1))
     maps_labels = pd.DataFrame(data=df_label, columns=['Mapped Labels'])
     mapped_dataset = pd.concat([df, maps_labels], axis=1)
-    # mapped_dataset = mapped_dataset.drop(columns=mapped_dataset.columns[0], axis=1)
-    mapped_dataset = mapped_dataset.drop(columns=mapped_dataset.columns[1], axis=1)
-    mapped_dataset.to_csv(const.PREPROCESS_ROOT + '/train_ht_dataset_test.csv', index=False)
+    mapped_dataset = mapped_dataset.drop(columns=mapped_dataset.columns[2], axis=1)
+    mapped_dataset.to_csv(const.PREPROCESS_ROOT + '/dataset_train_ht.csv', index=False)
 
     return
 
@@ -200,7 +199,8 @@ def convert_head_tail_dataset(path_json):
     df_t = pd.DataFrame(data=array_tail, columns=['tail sent'])
     df_r = pd.DataFrame(data=array_label, columns=['rel label'])
     final_dataset = pd.concat([df_h, df_t, df_r], axis=1)
-    final_dataset.to_csv(const.PREPROCESS_ROOT + '/head_tail_test.csv', index=False )
+    final_dataset.to_csv(const.PREPROCESS_ROOT + '/head_tail.csv', index=False )
+    map_label(path_csv=const.PREPROCESS_ROOT + '/head_tail.csv', path_rel=const.PREFIX_INFO_REL)
     
     return
 
@@ -221,8 +221,8 @@ def prepare_intra_dataset():
         sent_tail, mentions_t = array_tail[i].split('#', maxsplit=1)
         if sent_head == sent_tail:
             sent_head = sent_head.translate({ord(i): None for i in '[]'})
-            mentions = mentions.translate({ord('#'): None})
-            mentions_t = mentions_t.translate({ord('#'): None})
+            # mentions = mentions.translate({ord('#'): None})
+            # mentions_t = mentions_t.translate({ord('#'): None})
             new_sent = "".join([sent_head,'#', mentions, mentions_t]) 
             new_label.append(array_label[i])
             new_list.append(new_sent)
