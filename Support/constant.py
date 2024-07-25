@@ -7,6 +7,7 @@ EVAL_ROOT = 'Evaluation'
 # Preprocessing module constants
 DoCRED_PREFIX = os.path.join(DATA_ROOT, 'DocRED')
 DATASET_TRAIN_HUMAN = os.path.join(DoCRED_PREFIX, 'train_annotated.json')
+DATASET_TRAIN_DISTANT = os.path.join(DoCRED_PREFIX, 'train_distant.json')
 DATASET_EVAL = os.path.join(DoCRED_PREFIX, 'dev.json')
 PREFIX_INFO_REL = os.path.join(DoCRED_PREFIX, 'rel_info.json')
 DATASET_HT = os.path.join(PREPROCESS_ROOT, 'dataset_ht.csv')

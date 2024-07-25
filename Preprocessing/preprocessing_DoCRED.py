@@ -201,6 +201,8 @@ def convert_head_tail_dataset(path_json):
     final_dataset = pd.concat([df_h, df_t, df_r], axis=1)
     final_dataset.to_csv(const.PREPROCESS_ROOT + '/head_tail.csv', index=False )
     map_label(path_csv=const.PREPROCESS_ROOT + '/head_tail.csv', path_rel=const.PREFIX_INFO_REL)
+    prepare_intra_dataset()
+
     
     return
 

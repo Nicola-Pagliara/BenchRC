@@ -10,3 +10,5 @@ Data/DocRED/dev.json
 Data/DocRED/rel_info.json
 Data/DocRED/train_annotated.json
 Data/DocRED/train_distant.json
+Models/distillBERT_weights.pth
+.gitignore

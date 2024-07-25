@@ -5,13 +5,12 @@ from Support import constant as const
 
 def pipeline():
     # add tail head and genralize it
-    #prep.prepare_intra_dataset()
     prep.convert_head_tail_dataset(const.DATASET_TRAIN_HUMAN)
     print('Preprocessing phase ending')
     trn.general_train()
     print('Train phase ending')
-    #evl.compute_numeric_metrics()
-    #print('Evaluation phase ending')
+    evl.compute_numeric_metrics()
+    print('Evaluation phase ending')
     return
 
 
